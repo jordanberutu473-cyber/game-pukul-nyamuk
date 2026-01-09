@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Pukul Nyamuk - Pro</title>
+    <style>
+        body { 
+            text-align: center; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        h1 { color: #2c3e50; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin-top: 10px; }
+
+        .papan-skor { 
+            font-size: 24px; 
+            background: rgba(255, 255, 255, 0.8);
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+
+        /* 1. MENAMBAHKAN GAMBAR KURSOR (TEPUKAN) */
+        .area-game { 
+            width: 100%; 
+            height: 70vh; 
+            position: relative; 
+            /* Ganti 'tepukan.png' dengan nama file gambar pemukul Anda */
+            cursor: url('tepukan.png'), auto; 
+        }
+
+        #mulaiBtn {
+            padding: 15px 40px; font-size: 20px; background-color: #27ae60;
+            color: white; border: none; border-radius: 10px; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 4px #1e8449;
+        }
+
+        .nyamuk {
+            width: 80px; /* Ukuran bisa disesuaikan dengan gambar png Anda */
+            height: 80px;
+            position: absolute;
+            cursor: pointer;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+            animation: terbang 0.2s infinite alternate;
+        }
+
+        @keyframes terbang {
+            from { transform: scale(1) rotate(0deg); }
+            to { transform: scale(1.1) rotate(5deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🦟 PUKUL NYAMUK!</h1>
+    <div class="papan-skor">
+        Skor: <span id="skor">0</span> | ⏳ Waktu: <span id="waktu">30</span>s
+    </div>
+    <br>
+    <button id="mulaiBtn" onclick="mulaiGame()">MULAI PERMAINAN</button>
+
+    <div class="area-game" id="areaGame"></div>
+
+    <script>
+        const areaGame = document.getElementById('areaGame');
+        const skorElemen = document.getElementById('skor');
+        const waktuElemen = document.getElementById('waktu');
+        const mulaiBtn = document.getElementById('mulaiBtn');
+
+        let skor = 0;
+        let waktu = 30;
+        let gameBerjalan = false;
+        let intervalNyamuk;
+        let intervalWaktu;
+
+        // 2. MENAMBAHKAN FILE GAMBAR NYAMUK .PNG ANDA DI SINI
+        const linkGambarNyamuk = "nyamuk.png"; 
+
+        function mulaiGame() {
+            skor = 0;
+            waktu = 60;
+            gameBerjalan = true;
+            skorElemen.innerText = skor;
+            waktuElemen.innerText = waktu;
+            mulaiBtn.style.display = 'none';
+
+            intervalWaktu = setInterval(() => {
+                waktu--;
+                waktuElemen.innerText = waktu;
+                if (waktu === 0) selesaiGame();
+            }, 1000);
+
+            munculkanNyamuk();
+        }
+
+        function munculkanNyamuk() {
+            if (!gameBerjalan) return;
+
+            areaGame.innerHTML = '';
+            const nyamuk = document.createElement('img');
+            nyamuk.src = linkGambarNyamuk; 
+            nyamuk.className = 'nyamuk';
+
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (areaGame.offsetHeight - 100);
+
+            nyamuk.style.left = x + 'px';
+            nyamuk.style.top = y + 'px';
+
+            nyamuk.onclick = () => {
+                skor++;
+                skorElemen.innerText = skor;
+                nyamuk.style.transform = 'scale(0) rotate(180deg)'; // Efek hancur
+                setTimeout(() => {
+                    nyamuk.remove();
+                    clearTimeout(intervalNyamuk);
+                    munculkanNyamuk();
+                }, 100);
+            };
+
+            areaGame.appendChild(nyamuk);
+            let kecepatan = Math.max(400, 1000 - (skor * 20)); 
+            intervalNyamuk = setTimeout(munculkanNyamuk, kecepatan);
+        }
+
+        function selesaiGame() {
+            gameBerjalan = false;
+            clearInterval(intervalWaktu);
+            clearTimeout(intervalNyamuk);
+            areaGame.innerHTML = '';
+            alert('Waktu Habis! Skor Akhir Anda: ' + skor);
+            mulaiBtn.style.display = 'inline-block';
+            mulaiBtn.innerText = 'Main Lagi 🔄';
+        }
+    </script>
+</body>
+</html>
